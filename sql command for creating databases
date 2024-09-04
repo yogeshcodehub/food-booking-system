@@ -1,11 +1,11 @@
 
-### Create the Database
+#Create the Database
 sql
 CREATE DATABASE food;
 USE food;
 
 
-### Create the Food Table
+#Create the Food Table
 sql
 CREATE TABLE Food (
     Food_id INT(16) NOT NULL PRIMARY KEY,
@@ -15,7 +15,7 @@ CREATE TABLE Food (
 );
 
 
-### Create the Employee Table
+#Create the Employee Table
 sql
 CREATE TABLE Employee (
     Emp_id INT(23) NOT NULL PRIMARY KEY,
@@ -27,7 +27,7 @@ CREATE TABLE Employee (
 );
 
 
-### Create the Orderfood Table
+#Create the Orderfood Table
 sql
 CREATE TABLE Orderfood (
     OrderF_id INT(16) NOT NULL PRIMARY KEY,
