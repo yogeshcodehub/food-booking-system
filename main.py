@@ -1,7 +1,7 @@
 import os
 import platform
 import mysql.connector
-import pandas as pd
+
 
 mydb = mysql.connector.connect(host="localhost", \
                                user="root", \
