@@ -1,212 +1,234 @@
 import os
 import platform
 import mysql.connector
+from mysql.connector import Error
+
+# Database configuration
+DB_CONFIG = {
+    "host": "localhost",
+    "user": "root",
+    "password": "6qbd*****6",
+    "database": "food"
+}
 
 
-mydb = mysql.connector.connect(host="localhost", \
-                               user="root", \
-                               passwd="6Qbdnkkia6,", \
-                               database="food")
-mycursor = mydb.cursor()
-
-
-def Customer():
-    L = []
-    c_id = int(input("Enter the customer ID number : "))
-    L.append(c_id)
-    name = input("Enter the Customer Name: ")
-    L.append(name)
-    cphone = int(input("Enter customer phone number : "))
-    L.append(cphone)
-    payment = int(input("Enter payment method ((1)credit card/(2)Debit Card:) "))
-    L.append(payment)
-    pstatus = input("Enter the payment status : ")
-    L.append(pstatus)
-    email = input("Enter the email id")
-    L.append(email)
-    orderid = input("enter orderid")
-    L.append(orderid)
-    date = input("Enter the Date  : ")
-    L.append(date)
-    cust = (L)
-    sql = "insert into customer (c_id,name,cphone,payment,pstatus,email,orderid,date) values (%s,%s,%s,%s,%s,%s,%s,%s)"
-    mycursor.execute(sql, cust)
-    mydb.commit()
-
-
-# Customer Table :- C_id (PK	C_name	C_phonenum	Payment_method (Cash/Credit Card)	Payment_status (Paid/Unpaid)	Email	Emp_id (FK)	OrderF_id (FK)	date
-
-
-def Employee():
-    L = []
-    Emp_id = int(input("Enter the Employee id : "))
-    L.append(Emp_id)
-    ename = input("Enter the Employee Name: ")
-    L.append(ename)
-    emp_g = input("Enter Employee Genderr : ")
-    L.append(emp_g)
-    eage = int(input("Enter Employee age"))
-    L.append(eage)
-    emp_phone = int(input("enter employee phone number"))
-    L.append(emp_phone)
-    pwd = input("Enter the password : ")
-    L.append(pwd)
-    EMP = (L)
-    sql = "insert into Employee (Emp_id,ename,emp_g,eage,emp_phone,pwd) values (%s,%s,%s,%s,%s,%s)"
-    mycursor.execute(sql, EMP)
-    mydb.commit()
-
-
-def Food():
-    L = []
-    Food_id = int(input("Enter the Food id : "))
-    L.append(Food_id)
-    Foodname = input("Enter the Food Name: ")
-    L.append(Foodname)
-    Food_size = input("Enter Food size : ")
-    L.append(Food_size)
-    prize = int(input("Enter Prize of Food"))
-    L.append(prize)
-    Food = (L)
-    sql = "insert into Food (Food_id,Foodname,Food_size,prize ) values (%s,%s,%s,%s)"
-    mycursor.execute(sql, Food)
-    mydb.commit()
-
-
-# Food_id (PK	Foodname	Food_size	price
-
-
-def OrderFood():
-    L = []
-    OrderF_id = int(input("Enter the Food Order id : "))
-    L.append(OrderF_id)
-    C_id = input("Enter the Customer id : ")
-    L.append(C_id)
-    Emp_id = input("Enter Employee id: ")
-    L.append(Emp_id)
-    Food_id = int(input("Enter Food id"))
-    L.append(Food_id)
-    Food_qty = input("Enter Qty: ")
-    L.append(Food_qty)
-    Total_price = input("Enter Total_price")
-    L.append(Total_price)
-    OrderFood = (L)
-    sql = "insert into OrderFood (OrderF_id,C_id,Emp_id,Food_id,Food_qty,Total_price ) values (%s,%s,%s,%s,%s,%s)"
-    mycursor.execute(sql, OrderFood)
-    mydb.commit()
-
-
-# OrderF_id (PK)	C_id (FK)	Employee_id (FK)	Food_id (FK)	Food_qty	Total_price
-
-
-def View():
-    print("Select the search criteria : ")
-    print("1. Employee")
-    print("2. Customer")
-    print("3. Food")
-    print("4. Order Food")
-    ch = int(input("Enter the choice 1 to 4 : "))
-    if ch == 1:
-        s = int(input("enter Employee ID:"))
-        rl = (s,)
-        sql = "select * from Employee where Emp_id=%s"
-        mycursor.execute(sql, rl)
-        res = mycursor.fetchall()
-        for x in res:
-            print(x)
-
-
-
-    elif ch == 2:
-        s = input("Enter Customer Name : ")
-        rl = (s,)
-        sql = "select * from Customer where cname=%s"
-        mycursor.execute(sql, rl)
-        res = mycursor.fetchall()
-        for x in res:
-            print(x)
-
-    elif ch == 3:
-
-        sql = "select * from Food"
-        mycursor.execute(sql)
-        res = mycursor.fetchall()
-        for x in res:
-            print(x)
-
-
-    elif ch == 4:
-        s = int(input("Enter Food id ID : "))
-        rl = (s,)
-        sql = "select * from Foodorder where food_id=%s"
-        mycursor.execute(sql, rl)
-        res = mycursor.fetchall()
-        for x in res:
-            print(x)
-
-    # print("The Food details are as follows : ")
-    # print("(Custoemer ID, Food Name, quatity, Cost )")
-    # for x in res:
-    # print(x)
-
-
-def feeDeposit():
-    L = []
-    roll = int(input("Enter the roll number : "))
-    L.append(roll)
-    feedeposit = int(input("Enter the Fee to be deposited : "))
-    L.append(feedeposit)
-    month = input("Enter month of fee : ")
-    L.append(month)
-    fee = (L)
-    sql = "insert into fee (roll,feedeposit,month) values (%s,%s,%s)"
-    mycursor.execute(sql, fee)
-    mydb.commit()
-
-
-def MenuSet():
-    print("Enter 1 : To Add Employee")
-    print("Enter 2 : To Add Cutomer details")
-    print("Enter 3 : To Add Food Details ")
-    print("Enter 4 : For Food Order")
-    print("Enter 5 : For feeDeposit")
-    print("Enter 6 : To view Food booking")
-
+def get_db_connection():
+    """Establishes and returns database connection and cursor"""
     try:
+        conn = mysql.connector.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        return conn, cursor
+    except Error as e:
+        print(f"Database connection error: {e}")
+        exit()
 
-        userInput = int(input("Please Select An Above Option: "))
-    except ValueError:
-        exit("\nHy! That's Not A Number")
+
+def close_db_connection(conn, cursor):
+    """Closes database connection"""
+    try:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+    except Error as e:
+        print(f"Error closing connection: {e}")
+
+
+def get_valid_input(prompt, input_type=str):
+    """Validates user input based on type"""
+    while True:
+        try:
+            user_input = input_type(input(prompt))
+            if input_type == str and not user_input:
+                raise ValueError("Input cannot be empty")
+            return user_input
+        except ValueError:
+            print(f"Invalid input. Please enter a valid {input_type.__name__}.")
+
+
+def handle_database_operation(query, params=None, fetch=False):
+    """Handles database operations with error handling"""
+    conn, cursor = get_db_connection()
+    try:
+        cursor.execute(query, params)
+        if fetch:
+            return cursor.fetchall()
+        conn.commit()
+        print("Operation completed successfully.")
+    except Error as e:
+        print(f"Database error: {e}")
+        conn.rollback()
+        return None
+    finally:
+        close_db_connection(conn, cursor)
+
+
+def add_customer():
+    """Adds a new customer to the database"""
+    print("\n--- Add New Customer ---")
+    fields = [
+        ("Customer ID", int),
+        ("Customer Name", str),
+        ("Phone Number", int),
+        ("Payment Method (1=Credit Card, 2=Debit Card)", int),
+        ("Payment Status (Paid/Unpaid)", str),
+        ("Email", str),
+        ("Order ID", int),
+        ("Date (YYYY-MM-DD)", str)
+    ]
+
+    values = [get_valid_input(f"Enter {field[0]}: ", field[1]) for field in fields]
+
+    query = """INSERT INTO customer 
+               (c_id, name, cphone, payment, pstatus, email, orderid, date) 
+               VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"""
+    handle_database_operation(query, tuple(values))
+
+
+def add_employee():
+    """Adds a new employee to the database"""
+    print("\n--- Add New Employee ---")
+    fields = [
+        ("Employee ID", int),
+        ("Employee Name", str),
+        ("Gender", str),
+        ("Age", int),
+        ("Phone Number", int),
+        ("Password", str)
+    ]
+
+    values = [get_valid_input(f"Enter {field[0]}: ", field[1]) for field in fields]
+
+    query = """INSERT INTO Employee 
+               (Emp_id, ename, emp_g, eage, emp_phone, pwd) 
+               VALUES (%s, %s, %s, %s, %s, %s)"""
+    handle_database_operation(query, tuple(values))
+
+
+def add_food_item():
+    """Adds a new food item to the database"""
+    print("\n--- Add New Food Item ---")
+    fields = [
+        ("Food ID", int),
+        ("Food Name", str),
+        ("Food Size", str),
+        ("Price", int)
+    ]
+
+    values = [get_valid_input(f"Enter {field[0]}: ", field[1]) for field in fields]
+
+    query = """INSERT INTO Food 
+               (Food_id, Foodname, Food_size, prize) 
+               VALUES (%s, %s, %s, %s)"""
+    handle_database_operation(query, tuple(values))
+
+
+def add_order():
+    """Adds a new food order to the database"""
+    print("\n--- Add New Order ---")
+    fields = [
+        ("Order ID", int),
+        ("Customer ID", int),
+        ("Employee ID", int),
+        ("Food ID", int),
+        ("Quantity", int),
+        ("Total Price", int)
+    ]
+
+    values = [get_valid_input(f"Enter {field[0]}: ", field[1]) for field in fields]
+
+    query = """INSERT INTO OrderFood 
+               (OrderF_id, C_id, Emp_id, Food_id, Food_qty, Total_price) 
+               VALUES (%s, %s, %s, %s, %s, %s)"""
+    handle_database_operation(query, tuple(values))
+
+
+def view_records():
+    """Displays records from the database"""
+    print("\n--- View Records ---")
+    options = {
+        1: ("Employee", "Employee", "Emp_id"),
+        2: ("Customer", "Customer", "c_id"),
+        3: ("Food Items", "Food", None),
+        4: ("Orders", "OrderFood", "OrderF_id")
+    }
+
+    for key, value in options.items():
+        print(f"{key}. View {value[0]}")
+
+    choice = get_valid_input("Enter your choice (1-4): ", int)
+
+    if choice not in options:
+        print("Invalid choice")
+        return
+
+    table, column = options[choice][1], options[choice][2]
+    if column:
+        search_value = get_valid_input(f"Enter {column} to search: ", int)
+        query = f"SELECT * FROM {table} WHERE {column} = %s"
+        results = handle_database_operation(query, (search_value,), fetch=True)
     else:
-        print("\n")
-    if (userInput == 1):
-        Employee()
-    elif (userInput == 2):
-        Customer()
-    elif (userInput == 3):
-        Food()
-    elif (userInput == 4):
-        OrderFood()
-    elif (userInput == 5):
-        feeDeposit()
-    elif (userInput == 6):
-        View()
+        query = f"SELECT * FROM {table}"
+        results = handle_database_operation(query, fetch=True)
 
+    if results:
+        print(f"\n{table} Records:")
+        for row in results:
+            print(row)
     else:
-        print("Enter correct choice. . . ")
+        print("No records found.")
 
 
-def runAgain():
-    runAgn = input("\nwant to run Again Y/N")
-    while runAgn.lower() == 'y':
-        if (platform.system() == "Windows"):
-            print(os.system('cls'))
-        else:
-            print(os.system('clear'))
-        MenuSet()
-        runAgn = input("\nwant to run Againy/n")
-        print("Good Bye ... HAVE A NICE DAY")
+def update_payment_status():
+    """Updates customer payment status"""
+    print("\n--- Update Payment Status ---")
+    c_id = get_valid_input("Enter Customer ID: ", int)
+    new_status = get_valid_input("Enter new payment status (Paid/Unpaid): ", str)
+
+    query = "UPDATE Customer SET pstatus = %s WHERE c_id = %s"
+    handle_database_operation(query, (new_status, c_id))
 
 
-MenuSet()
-runAgain()
+def clear_screen():
+    """Clears the terminal screen"""
+    os.system('cls' if platform.system() == 'Windows' else 'clear')
+
+
+def main_menu():
+    """Displays the main menu and handles user input"""
+    menu_options = {
+        1: ("Add Employee", add_employee),
+        2: ("Add Customer", add_customer),
+        3: ("Add Food Item", add_food_item),
+        4: ("Add Order", add_order),
+        5: ("Update Payment Status", update_payment_status),
+        6: ("View Records", view_records),
+        7: ("Exit", exit)
+    }
+
+    while True:
+        clear_screen()
+        print("\n=== Food Ordering System ===")
+        for key, value in menu_options.items():
+            print(f"{key}. {value[0]}")
+
+        try:
+            choice = int(input("\nEnter your choice (1-7): "))
+            if choice == 7:
+                print("Exiting program...")
+                break
+
+            if choice in menu_options:
+                menu_options[choice][1]()
+            else:
+                print("Invalid choice. Please try again.")
+
+            input("\nPress Enter to continue...")
+
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+            input("Press Enter to continue...")
+
+
+if __name__ == "__main__":
+    main_menu()
