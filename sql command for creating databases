@@ -1,40 +1,46 @@
-
-#Create the Database
-sql
-CREATE DATABASE food;
+-- Create the database
+CREATE DATABASE IF NOT EXISTS food;
 USE food;
 
-
-#Create the Food Table
-sql
-CREATE TABLE Food (
-    Food_id INT(16) NOT NULL PRIMARY KEY,
-    Foodname VARCHAR(18) NOT NULL,
-    Food_size VARCHAR(18) NOT NULL,
-    prize INT(36) NOT NULL
+-- Create the customer table
+CREATE TABLE IF NOT EXISTS customer (
+    c_id INT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    cphone VARCHAR(15) NOT NULL,
+    payment INT NOT NULL,  -- 1=Credit Card, 2=Debit Card
+    pstatus VARCHAR(10) NOT NULL,  -- 'Paid' or 'Unpaid'
+    email VARCHAR(255) NOT NULL,
+    orderid INT,  -- You may consider a foreign key constraint if needed
+    date DATE  -- Format: YYYY-MM-DD
 );
 
-
-#Create the Employee Table
-sql
-CREATE TABLE Employee (
-    Emp_id INT(23) NOT NULL PRIMARY KEY,
-    ename VARCHAR(43) NOT NULL,
-    emp_g VARCHAR(43) NOT NULL,
-    eage INT(3) NOT NULL,
-    emp_phone VARCHAR(18) NOT NULL,
-    pwd VARCHAR(18) NOT NULL
+-- Create the Employee table
+CREATE TABLE IF NOT EXISTS Employee (
+    Emp_id INT PRIMARY KEY,
+    ename VARCHAR(255) NOT NULL,
+    emp_g VARCHAR(10),  -- Gender
+    eage INT,
+    emp_phone VARCHAR(15),
+    pwd VARCHAR(255) NOT NULL  -- In a production environment, passwords should be hashed
 );
 
-
-#Create the Orderfood Table
-sql
-CREATE TABLE Orderfood (
-    OrderF_id INT(16) NOT NULL PRIMARY KEY,
-    C_id VARCHAR(17) NOT NULL,
-    Emp_id VARCHAR(17) NOT NULL,
-    Food_id INT(17) NOT NULL,
-    Food_qty VARCHAR(17) NOT NULL,
-    Total_price VARCHAR(17) NOT NULL
+-- Create the Food table
+CREATE TABLE IF NOT EXISTS Food (
+    Food_id INT PRIMARY KEY,
+    Foodname VARCHAR(255) NOT NULL,
+    Food_size VARCHAR(50),
+    prize INT NOT NULL
 );
 
+-- Create the OrderFood table
+CREATE TABLE IF NOT EXISTS OrderFood (
+    OrderF_id INT PRIMARY KEY,
+    C_id INT,
+    Emp_id INT,
+    Food_id INT,
+    Food_qty INT,
+    Total_price INT,
+    FOREIGN KEY (C_id) REFERENCES customer(c_id),
+    FOREIGN KEY (Emp_id) REFERENCES Employee(Emp_id),
+    FOREIGN KEY (Food_id) REFERENCES Food(Food_id)
+);
